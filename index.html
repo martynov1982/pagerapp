@@ -1,1 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAGER — Controlled Reachability</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0A0C0F;
+    --surface: #14171C;
+    --surface-2: #1B1F25;
+    --line: rgba(242,243,244,0.09);
+    --line-strong: rgba(242,243,244,0.16);
+    --text: #F2F3F4;
+    --text-dim: #8B929C;
+    --text-faint: #565C64;
 
+    --personal: #20C997;
+    --work: #38BDF8;
+    --guest: #D4C4B7;
+    --alter: #FFCE7A;
+
+    --radius-s: 6px;
+    --radius-m: 10px;
+    --radius-l: 14px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .mono{ font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.04em; }
+
+  a{ color: inherit; }
+
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position: fixed;
+    top:0; left:0; right:0;
+    z-index: 50;
+    padding: 22px 32px;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(10,12,15,0.9), rgba(10,12,15,0));
+    pointer-events: none;
+  }
+  .nav-mark{
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.14em;
+    pointer-events: auto;
+  }
+  .nav-id{
+    font-size: 12px;
+    color: var(--text-faint);
+    pointer-events: auto;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height: 100vh;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding: 140px 32px 80px;
+    position: relative;
+  }
+
+  .eyebrow{
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--text-faint);
+    margin-bottom: 22px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.1s;
+  }
+
+  h1.headline{
+    font-size: clamp(30px, 5.6vw, 64px);
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    max-width: 900px;
+    margin: 0 0 22px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease forwards 0.2s;
+  }
+
+  h1.headline .dim{ color: var(--text-dim); font-weight: 500; }
+
+  .subhead{
+    font-size: clamp(15px, 1.6vw, 18px);
+    color: var(--text-dim);
+    max-width: 560px;
+    line-height: 1.55;
+    margin: 0 0 56px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease forwards 0.32s;
+  }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform: translateY(14px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  /* ---------- STAGE (phone + card deck) shared between hero + multiprofile ---------- */
+  .stage{
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    height: 560px;
+    margin: 0 auto;
+    perspective: 1400px;
+  }
+
+  .hero .stage{
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.45s;
+  }
+
+  .deck{
+    position:absolute;
+    inset:0;
+    transform-style: preserve-3d;
+  }
+
+  .id-card{
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 260px;
+    height: 400px;
+    margin: -200px 0 0 -130px;
+    border-radius: var(--radius-l);
+    border: 1px solid var(--line-strong);
+    background: linear-gradient(155deg, var(--surface-2), var(--surface) 70%);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+    transition: transform 0.6s cubic-bezier(.22,.9,.28,1), opacity 0.5s ease, filter 0.5s ease;
+    display:flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 22px;
+  }
+
+  .id-card .avatar{
+    width: 44px; height: 44px;
+    border-radius: var(--radius-s);
+    background: var(--card-color, var(--personal));
+  }
+
+  .id-card .card-name{
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 14px;
+  }
+
+  .id-card .card-desc{
+    font-size: 12.5px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .id-card .card-id{
+    font-size: 11px;
+    color: var(--text-faint);
+    display:flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
+  .id-card .card-id b{ color: var(--card-color, var(--text-dim)); font-weight: 500; }
+
+  .id-card .tag{
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--card-color, var(--text-dim));
+    font-weight: 600;
+  }
+
+  /* stacked depth positions, used both for hero decorative state and js-driven state */
+  .id-card[data-pos="0"]{ transform: translate3d(0,0,0) rotateY(0deg) scale(1); opacity:1; z-index:5; filter: none; }
+  .id-card[data-pos="1"]{ transform: translate3d(46px,26px,-90px) rotateY(-8deg) scale(0.93); opacity:0.55; z-index:4; filter: blur(0.4px) brightness(0.75); }
+  .id-card[data-pos="2"]{ transform: translate3d(86px,50px,-180px) rotateY(-13deg) scale(0.86); opacity:0.32; z-index:3; filter: blur(0.8px) brightness(0.6); }
+  .id-card[data-pos="3"]{ transform: translate3d(120px,72px,-270px) rotateY(-17deg) scale(0.8); opacity:0.16; z-index:2; filter: blur(1.2px) brightness(0.5); }
+
+  /* phone sits in front, holding the "current" profile view */
+  .phone{
+    position:absolute;
+    top:50%; left:50%;
+    width: 232px;
+    height: 470px;
+    margin: -235px 0 0 -116px;
+    border-radius: 30px;
+    border: 1px solid var(--line-strong);
+    background: #0D1013;
+    box-shadow: 0 40px 80px -24px rgba(0,0,0,0.75);
+    z-index: 10;
+    padding: 14px;
+    transform: translate3d(-70px,-10px,60px);
+  }
+
+  .phone-screen{
+    height:100%;
+    border-radius: 20px;
+    background: var(--surface);
+    padding: 20px 16px;
+    display:flex;
+    flex-direction: column;
+  }
+
+  .phone-topline{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-bottom: 22px;
+  }
+
+  .phone-avatar{
+    width: 52px; height: 52px;
+    border-radius: var(--radius-s);
+    background: var(--phone-color, var(--personal));
+    transition: background 0.4s ease;
+    margin-bottom: 14px;
+  }
+
+  .phone-name{
+    font-size: 18px;
+    font-weight: 700;
+    transition: opacity 0.25s ease;
+  }
+  .phone-tag{
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: var(--phone-color, var(--personal));
+    margin-bottom: 6px;
+    transition: color 0.4s ease;
+  }
+  .phone-desc{
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-top: 6px;
+  }
+
+  .phone-meta{
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .phone-audience{
+    display:flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-bottom: 12px;
+  }
+  .phone-audience b{ color: var(--text); font-weight: 600; }
+
+  .perm-row{
+    display:flex;
+    gap: 6px;
+  }
+  .perm{
+    flex:1;
+    height: 26px;
+    border-radius: var(--radius-s);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    transition: all 0.3s ease;
+  }
+  .perm.on{
+    background: color-mix(in srgb, var(--phone-color, var(--personal)) 16%, var(--surface-2));
+    border-color: color-mix(in srgb, var(--phone-color, var(--personal)) 50%, var(--line));
+    color: var(--text);
+  }
+
+  .scroll-cue{
+    margin-top: 46px;
+    font-size: 11px;
+    color: var(--text-faint);
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    gap:8px;
+    opacity:0;
+    animation: fadeUp 0.9s ease forwards 0.7s;
+  }
+  .scroll-cue .line{
+    width:1px; height:28px;
+    background: linear-gradient(var(--text-faint), transparent);
+    animation: pulseLine 1.8s ease-in-out infinite;
+  }
+  @keyframes pulseLine{ 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+  /* ---------- PROBLEM (flat contrast) ---------- */
+  .problem{
+    padding: 140px 32px;
+    display:flex;
+    justify-content:center;
+  }
+  .problem-inner{
+    max-width: 720px;
+    text-align:center;
+  }
+  .problem-label{
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-faint);
+    margin-bottom: 20px;
+  }
+  .problem h2{
+    font-size: clamp(24px, 3.4vw, 36px);
+    font-weight: 600;
+    line-height: 1.35;
+    margin: 0 0 40px;
+    color: var(--text-dim);
+  }
+  .flat-card{
+    max-width: 320px;
+    margin: 0 auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--surface);
+    padding: 22px;
+    text-align:left;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .flat-card .avatar{
+    width:40px; height:40px;
+    border-radius: var(--radius-s);
+    background: var(--text-faint);
+    flex-shrink:0;
+  }
+  .flat-card .fc-title{ font-size:14px; font-weight:600; }
+  .flat-card .fc-sub{ font-size:12px; color:var(--text-faint); margin-top:2px;}
+
+  /* ---------- MULTIPROFILE (pinned scroll section) ---------- */
+  .multiprofile{
+    position: relative;
+    height: 420vh;
+  }
+
+  .mp-sticky{
+    position: sticky;
+    top:0;
+    height: 100vh;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  .mp-heading{
+    text-align:center;
+    max-width: 620px;
+    margin: 0 auto 8px;
+    padding: 0 32px;
+  }
+  .mp-heading .eyebrow{ animation:none; opacity:1; }
+  .mp-heading h2{
+    font-size: clamp(24px, 3.6vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 14px;
+  }
+  .mp-heading p{
+    font-size: 14.5px;
+    color: var(--text-dim);
+    line-height: 1.55;
+    margin:0;
+  }
+
+  .mp-body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 70px;
+    margin-top: 34px;
+    width:100%;
+  }
+
+  .mp-labels{
+    display:flex;
+    flex-direction:column;
+    gap: 18px;
+  }
+  .mp-label{
+    font-size: 13px;
+    color: var(--text-faint);
+    font-weight: 600;
+    padding-left: 16px;
+    border-left: 2px solid var(--line);
+    transition: all 0.35s ease;
+    letter-spacing: 0.01em;
+  }
+  .mp-label small{
+    display:block;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+  .mp-label.active{
+    color: var(--text);
+    border-left-color: var(--active-color, var(--personal));
+  }
+
+  .mp-progress{
+    width: 200px;
+    height: 2px;
+    background: var(--line);
+    border-radius: 2px;
+    margin-top: 30px;
+    overflow:hidden;
+  }
+  .mp-progress-fill{
+    height:100%;
+    width: 25%;
+    background: var(--active-color, var(--personal));
+    transition: width 0.3s ease, background 0.4s ease;
+  }
+
+  /* ---------- WHY IT MATTERS ---------- */
+  .why{
+    padding: 150px 32px;
+  }
+  .why-inner{ max-width: 900px; margin:0 auto; }
+  .why-head{
+    font-size: clamp(22px,3vw,32px);
+    font-weight:700;
+    max-width: 560px;
+    margin-bottom: 60px;
+    letter-spacing: -0.01em;
+  }
+  .why-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    overflow:hidden;
+  }
+  .why-item{
+    background: var(--bg);
+    padding: 30px 26px;
+  }
+  .why-item .wi-label{
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+    margin-bottom: 14px;
+  }
+  .why-item p{
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin:0;
+  }
+
+  /* ---------- CTA ---------- */
+  .cta{
+    padding: 160px 32px 100px;
+    text-align:center;
+  }
+  .cta h2{
+    font-size: clamp(26px, 4vw, 42px);
+    font-weight: 700;
+    max-width: 640px;
+    margin: 0 auto 34px;
+    letter-spacing: -0.01em;
+  }
+  .cta-actions{
+    display:flex;
+    gap: 14px;
+    justify-content:center;
+    flex-wrap: wrap;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    padding: 14px 26px;
+    border-radius: var(--radius-s);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration:none;
+    border: 1px solid var(--line-strong);
+    transition: all 0.25s ease;
+  }
+  .btn-primary{
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+  .btn-primary:hover{ opacity: 0.85; }
+  .btn-ghost{ color: var(--text-dim); }
+  .btn-ghost:hover{ color: var(--text); border-color: var(--text-dim); }
+
+  .foot{
+    text-align:center;
+    padding: 40px 32px 60px;
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
+  @media (max-width: 860px){
+    .mp-body{ flex-direction: column; gap: 30px; }
+    .mp-labels{ flex-direction: row; flex-wrap:wrap; justify-content:center; gap: 10px 16px; }
+    .mp-label{ border-left:none; border-bottom: 2px solid var(--line); padding-left:0; padding-bottom: 4px; }
+    .mp-label.active{ border-bottom-color: var(--active-color, var(--personal)); }
+    .why-grid{ grid-template-columns: 1fr; }
+    .stage{ transform: scale(0.85); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    html{ scroll-behavior:auto; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-mark">PAGER</div>
+  <div class="nav-id mono">A147&nbsp;0865</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="eyebrow">A PRIVATE ACCESS LAYER FOR COMMUNICATION</div>
+  <h1 class="headline">Messaging apps made us reachable<br class="brk"> by anyone. <span class="dim">We let you decide who gets through.</span></h1>
+  <p class="subhead">PAGER replaces your phone number with an ID, your inbox with requests, and your one profile with as many contextual identities as your relationships need.</p>
+
+  <div class="stage" id="heroStage">
+    <div class="deck">
+      <div class="id-card" data-pos="3" style="--card-color: var(--alter)">
+        <div><div class="tag">Alter Ego</div><div class="avatar"></div><div class="card-name">Mr. Fox</div><div class="card-desc">The best of me, off the record.</div></div>
+        <div class="card-id mono"><span>PAGER ID</span><b>A147 0865</b></div>
+      </div>
+      <div class="id-card" data-pos="2" style="--card-color: var(--guest)">
+        <div><div class="tag">Guest</div><div class="avatar"></div><div class="card-name">Temporary Contact</div><div class="card-desc">Time-limited access, no history carried forward.</div></div>
+        <div class="card-id mono"><span>PAGER ID</span><b>A147 0865</b></div>
+      </div>
+      <div class="id-card" data-pos="1" style="--card-color: var(--work)">
+        <div><div class="tag">Work</div><div class="avatar"></div><div class="card-name">Quest Hero</div><div class="card-desc">Product and client communication only.</div></div>
+        <div class="card-id mono"><span>PAGER ID</span><b>A147 0865</b></div>
+      </div>
+      <div class="id-card" data-pos="0" style="--card-color: var(--personal)">
+        <div><div class="tag">Personal</div><div class="avatar"></div><div class="card-name">Alex Reyes</div><div class="card-desc">Close friends and family.</div></div>
+        <div class="card-id mono"><span>PAGER ID</span><b>A147 0865</b></div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="phone-screen" style="--phone-color: var(--personal)">
+        <div class="phone-topline"><span>9:41</span><span>PAGER</span></div>
+        <div class="phone-avatar"></div>
+        <div class="phone-tag">Personal</div>
+        <div class="phone-name">Alex Reyes</div>
+        <div class="phone-desc">Close friends and family.</div>
+        <div class="phone-meta">
+          <div class="phone-audience"><span>Audience</span><b>18 contacts</b></div>
+          <div class="perm-row">
+            <div class="perm on">Text</div>
+            <div class="perm on">Audio</div>
+            <div class="perm on">Video</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-cue"><span>Scroll to see the model</span><div class="line"></div></div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="problem-inner">
+    <div class="problem-label">THE DEFAULT TODAY</div>
+    <h2>One phone number. One profile.<br>Everyone who has it sees the same you —<br>family, clients, couriers, strangers.</h2>
+    <div class="flat-card">
+      <div class="avatar"></div>
+      <div>
+        <div class="fc-title">+1 •••• ••92</div>
+        <div class="fc-sub">Reachable by anyone, in every context, all the time.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MULTIPROFILE -->
+<section class="multiprofile" id="mpSection">
+  <div class="mp-sticky">
+    <div class="mp-heading">
+      <div class="eyebrow">THE CORE MECHANIC</div>
+      <h2>One account. Multiple communication identities.</h2>
+      <p>Every profile carries its own name, avatar, audience and permissions — behind a single, unchanging Pager ID.</p>
+    </div>
+
+    <div class="mp-body">
+      <div class="mp-labels" id="mpLabels">
+        <div class="mp-label active" data-index="0" style="--active-color: var(--personal)">Personal<small>Close friends & family</small></div>
+        <div class="mp-label" data-index="1" style="--active-color: var(--work)">Work<small>Quest Hero</small></div>
+        <div class="mp-label" data-index="2" style="--active-color: var(--guest)">Guest<small>Temporary access</small></div>
+        <div class="mp-label" data-index="3" style="--active-color: var(--alter)">Alter Ego<small>Mr. Fox</small></div>
+      </div>
+
+      <div class="stage" id="mpStage">
+        <div class="deck" id="mpDeck">
+          <div class="id-card" data-idx="3" style="--card-color: var(--alter)">
+            <div><div class="tag">Alter Ego</div><div class="avatar"></div><div class="card-name">Mr. Fox</div><div class="card-desc">The best of me, off the record.</div></div>
+            <div class="card-id mono"><span>PAGER ID</span><b>A147 0865</b></div>
+          </div>
+          <div class="id-card" data-idx="2" style="--card-color: var(--guest)">
+            <div><div class="tag">Guest</div><div class="avatar"></div><div class="card-name">Temporary Contact</div><div class="card-desc">Time-limited access, no history carried forward.</div></div>
+            <div class="card-id mono"><span>PAGER ID</span><b>A147 0865</b></div>
+          </div>
+          <div class="id-card" data-idx="1" style="--card-color: var(--work)">
+            <div><div class="tag">Work</div><div class="avatar"></div><div class="card-name">Quest Hero</div><div class="card-desc">Product and client communication only.</div></div>
+            <div class="card-id mono"><span>PAGER ID</span><b>A147 0865</b></div>
+          </div>
+          <div class="id-card" data-idx="0" style="--card-color: var(--personal)">
+            <div><div class="tag">Personal</div><div class="avatar"></div><div class="card-name">Alex Reyes</div><div class="card-desc">Close friends and family.</div></div>
+            <div class="card-id mono"><span>PAGER ID</span><b>A147 0865</b></div>
+          </div>
+        </div>
+
+        <div class="phone">
+          <div class="phone-screen" id="mpPhoneScreen" style="--phone-color: var(--personal)">
+            <div class="phone-topline"><span>9:41</span><span>PAGER</span></div>
+            <div class="phone-avatar"></div>
+            <div class="phone-tag">Personal</div>
+            <div class="phone-name">Alex Reyes</div>
+            <div class="phone-desc">Close friends and family.</div>
+            <div class="phone-meta">
+              <div class="phone-audience"><span>Audience</span><b>18 contacts</b></div>
+              <div class="perm-row">
+                <div class="perm on">Text</div>
+                <div class="perm on">Audio</div>
+                <div class="perm on">Video</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mp-progress"><div class="mp-progress-fill" id="mpProgressFill"></div></div>
+  </div>
+</section>
+
+<!-- WHY IT MATTERS -->
+<section class="why">
+  <div class="why-inner">
+    <div class="why-head">Not just who can reach you. Which version of you they reach.</div>
+    <div class="why-grid">
+      <div class="why-item">
+        <div class="wi-label">Privacy</div>
+        <p>No phone number is ever exposed. Contact happens through an ID you control.</p>
+      </div>
+      <div class="why-item">
+        <div class="wi-label">Contextual identity</div>
+        <p>Different relationships see a different name, avatar and description — not a different account.</p>
+      </div>
+      <div class="why-item">
+        <div class="wi-label">Directional access</div>
+        <p>Text, audio and video are granted individually, by the receiver, per relationship.</p>
+      </div>
+      <div class="why-item">
+        <div class="wi-label">Safer first contact</div>
+        <p>Nobody enters a conversation without a request being accepted first.</p>
+      </div>
+      <div class="why-item">
+        <div class="wi-label">Temporary access</div>
+        <p>Couriers, services and short-term contacts can be granted access that expires on its own.</p>
+      </div>
+      <div class="why-item">
+        <div class="wi-label">One identity, not many</div>
+        <p>A single Pager ID underlies every profile — nothing about multiprofile fragments the account.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>PAGER is building a new access layer for messaging — controlled reachability, with contextual identity built in.</h2>
+  <div class="cta-actions">
+    <a href="mailto:hello@getpager.app?subject=PAGER%20deck%20request" class="btn btn-primary">Request the deck</a>
+    <a href="mailto:hello@getpager.app?subject=PAGER%20conversation" class="btn btn-ghost">Book a conversation</a>
+  </div>
+</section>
+
+<div class="foot mono">getpager.app</div>
+
+<script>
+(function(){
+  var profiles = [
+    { tag:'Personal', name:'Alex Reyes', desc:'Close friends and family.', audience:'18 contacts', color:'var(--personal)', perms:[1,1,1] },
+    { tag:'Work', name:'Quest Hero', desc:'Product and client communication only.', audience:'34 contacts', color:'var(--work)', perms:[1,1,0] },
+    { tag:'Guest', name:'Temporary Contact', desc:'Time-limited access, no history carried forward.', audience:'3 contacts', color:'var(--guest)', perms:[1,0,0] },
+    { tag:'Alter Ego', name:'Mr. Fox', desc:'The best of me, off the record.', audience:'5 contacts', color:'var(--alter)', perms:[1,1,0] }
+  ];
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var section = document.getElementById('mpSection');
+  var cards = document.querySelectorAll('#mpDeck .id-card');
+  var screen = document.getElementById('mpPhoneScreen');
+  var labels = document.querySelectorAll('#mpLabels .mp-label');
+  var fill = document.getElementById('mpProgressFill');
+
+  var current = -1;
+
+  function applyProfile(i){
+    if(i === current) return;
+    current = i;
+    var p = profiles[i];
+
+    screen.style.setProperty('--phone-color', p.color);
+    screen.querySelector('.phone-tag').textContent = p.tag;
+    screen.querySelector('.phone-name').textContent = p.name;
+    screen.querySelector('.phone-desc').textContent = p.desc;
+    screen.querySelector('.phone-audience b').textContent = p.audience;
+    var perms = screen.querySelectorAll('.perm');
+    perms.forEach(function(el, idx){
+      el.classList.toggle('on', !!p.perms[idx]);
+    });
+
+    labels.forEach(function(el){
+      var idx = parseInt(el.getAttribute('data-index'), 10);
+      el.classList.toggle('active', idx === i);
+    });
+
+    fill.style.width = ((i+1) / profiles.length * 100) + '%';
+    fill.style.background = p.color;
+
+    cards.forEach(function(card){
+      var idx = parseInt(card.getAttribute('data-idx'), 10);
+      var pos = (idx - i + profiles.length) % profiles.length;
+      card.setAttribute('data-pos', pos);
+    });
+  }
+
+  applyProfile(0);
+
+  function onScroll(){
+    var rect = section.getBoundingClientRect();
+    var total = rect.height - window.innerHeight;
+    if(total <= 0) return;
+    var progress = (-rect.top) / total;
+    progress = Math.min(1, Math.max(0, progress));
+    var i = Math.min(profiles.length - 1, Math.floor(progress * profiles.length));
+    applyProfile(i);
+  }
+
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if(!ticking){
+      window.requestAnimationFrame(function(){ onScroll(); ticking = false; });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  onScroll();
+})();
+</script>
+
+</body>
+</html>
