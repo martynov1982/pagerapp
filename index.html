@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PAGER Storyscroll Snap Bubbles</title>
+<title>PAGER Storyscroll v4</title>
 <style>
 html,body{margin:0;background:#03060b;color:#fff;}
 .after{min-height:100vh;background:#05070b;color:#C4D6F0;font:16px/1.5 Inter,system-ui,sans-serif;display:grid;place-items:center;padding:40px;text-align:center;}
@@ -11,12 +11,11 @@ html,body{margin:0;background:#03060b;color:#fff;}
 </style>
 </head>
 <body>
-<!-- PAGER Storyscroll Hero v2 / point-to-point scroll + profile message bubbles
-     Paste into Tilda T123. Video source is already set to GitHub raw MP4. -->
+<!-- PAGER Storyscroll Hero v4 / step-scroll + living video segments + simultaneous typed bubbles -->
 <style>
   :root {
     --pager-bg: #03060b;
-    --pager-ink: #f4f7fb;
+    --pager-ink: #f5f8fb;
     --pager-soft: #C4D6F0;
     --pager-accent: #A8BEDD;
     --profile-personal: #20C997;
@@ -26,9 +25,9 @@ html,body{margin:0;background:#03060b;color:#fff;}
     --vh: 1vh;
   }
 
-  * { box-sizing: border-box; }
+  .pager-story-v4, .pager-story-v4 * { box-sizing: border-box; }
 
-  .pager-snap-hero {
+  .pager-story-v4 {
     position: relative;
     height: calc(var(--vh) * 100);
     min-height: 680px;
@@ -39,48 +38,55 @@ html,body{margin:0;background:#03060b;color:#fff;}
     isolation: isolate;
   }
 
-  .pager-snap-hero * { box-sizing: border-box; }
-
-  .pager-snap-video {
+  .pager-v4-video {
     position: absolute;
     inset: 0;
+    z-index: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center center;
-    transform: scale(1.02);
-    filter: saturate(0.96) contrast(1.08) brightness(0.72);
-    opacity: 0.98;
-    z-index: 0;
+    transform: scale(1.018);
+    filter: saturate(0.98) contrast(1.08) brightness(0.74);
+    opacity: 1;
+    will-change: transform, filter;
   }
 
-  .pager-snap-shade {
+  .pager-v4-shade {
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
     background:
-      radial-gradient(circle at 48% 42%, rgba(168,190,221,0.08), transparent 30%),
-      linear-gradient(180deg, rgba(3,6,11,0.70) 0%, rgba(3,6,11,0.24) 42%, rgba(3,6,11,0.82) 100%),
-      linear-gradient(90deg, rgba(3,6,11,0.78) 0%, rgba(3,6,11,0.18) 30%, rgba(3,6,11,0.12) 65%, rgba(3,6,11,0.70) 100%);
+      radial-gradient(circle at 52% 44%, rgba(168,190,221,0.07), transparent 32%),
+      linear-gradient(180deg, rgba(3,6,11,0.72) 0%, rgba(3,6,11,0.14) 42%, rgba(3,6,11,0.82) 100%),
+      linear-gradient(90deg, rgba(3,6,11,0.84) 0%, rgba(3,6,11,0.20) 34%, rgba(3,6,11,0.08) 68%, rgba(3,6,11,0.78) 100%);
+    transition: background 520ms ease;
   }
 
-  .pager-snap-grain {
+  .pager-story-v4[data-mode="bubbles"] .pager-v4-shade {
+    background:
+      radial-gradient(circle at 51% 46%, rgba(168,190,221,0.05), transparent 34%),
+      linear-gradient(180deg, rgba(3,6,11,0.58) 0%, rgba(3,6,11,0.08) 48%, rgba(3,6,11,0.70) 100%),
+      linear-gradient(90deg, rgba(3,6,11,0.54) 0%, rgba(3,6,11,0.04) 33%, rgba(3,6,11,0.04) 70%, rgba(3,6,11,0.52) 100%);
+  }
+
+  .pager-v4-grain {
     position: absolute;
     inset: 0;
     z-index: 2;
     pointer-events: none;
-    opacity: 0.16;
+    opacity: 0.14;
     background-image:
       linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,255,255,0.026) 1px, transparent 1px);
     background-size: 56px 56px;
-    mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
   }
 
-  .pager-snap-topbar {
+  .pager-v4-topbar {
     position: absolute;
-    z-index: 8;
+    z-index: 20;
     left: clamp(18px, 4.5vw, 58px);
     right: clamp(18px, 4.5vw, 58px);
     top: max(18px, env(safe-area-inset-top));
@@ -90,31 +96,31 @@ html,body{margin:0;background:#03060b;color:#fff;}
     pointer-events: none;
   }
 
-  .pager-snap-mark {
+  .pager-v4-mark {
     display: inline-flex;
     align-items: center;
     gap: 9px;
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 850;
     letter-spacing: 0.25em;
     color: rgba(244,247,251,0.96);
   }
 
-  .pager-snap-mark span {
+  .pager-v4-mark span {
     width: 24px;
     height: 24px;
-    border: 1px solid rgba(196,214,240,0.42);
+    border: 1px solid rgba(196,214,240,0.44);
     border-radius: 7px;
     display: grid;
     place-items: center;
     font-size: 11px;
     letter-spacing: 0;
     color: var(--pager-soft);
-    background: rgba(3,6,11,0.34);
+    background: rgba(3,6,11,0.32);
     backdrop-filter: blur(12px);
   }
 
-  .pager-snap-system {
+  .pager-v4-system {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 10px;
     letter-spacing: 0.14em;
@@ -122,35 +128,42 @@ html,body{margin:0;background:#03060b;color:#fff;}
     color: rgba(168,190,221,0.74);
   }
 
-  .pager-snap-layer {
+  .pager-v4-layer {
     position: absolute;
     inset: 0;
     z-index: 5;
     pointer-events: none;
   }
 
-  .pager-step {
+  .pager-v4-step {
     position: absolute;
     opacity: 0;
-    transform: translate3d(0, 16px, 0);
-    transition: opacity 560ms cubic-bezier(.22,.61,.36,1), transform 560ms cubic-bezier(.22,.61,.36,1), filter 560ms ease;
-    filter: blur(5px);
+    visibility: hidden;
+    transform: translate3d(0, 18px, 0);
+    transition:
+      opacity 560ms cubic-bezier(.22,.61,.36,1),
+      visibility 0s linear 560ms,
+      transform 560ms cubic-bezier(.22,.61,.36,1),
+      filter 560ms ease;
+    filter: blur(8px);
     pointer-events: none;
   }
 
-  .pager-step.is-active {
+  .pager-v4-step.is-active {
     opacity: 1;
+    visibility: visible;
     transform: translate3d(0,0,0);
     filter: blur(0);
+    transition-delay: 90ms, 0s, 90ms, 90ms;
   }
 
-  .pager-intro {
+  .pager-v4-intro {
     left: clamp(22px, 5vw, 64px);
-    top: clamp(92px, 15vh, 150px);
-    width: min(780px, calc(100vw - 44px));
+    top: clamp(86px, 14vh, 140px);
+    width: min(820px, calc(100vw - 44px));
   }
 
-  .pager-eyebrow {
+  .pager-v4-eyebrow {
     margin: 0 0 18px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: clamp(10px, 1vw, 12px);
@@ -159,20 +172,20 @@ html,body{margin:0;background:#03060b;color:#fff;}
     color: var(--pager-accent);
   }
 
-  .pager-headline {
+  .pager-v4-headline {
     margin: 0;
-    max-width: 820px;
+    max-width: 880px;
     font-size: clamp(40px, 6.5vw, 82px);
     line-height: 0.96;
     letter-spacing: -0.068em;
-    font-weight: 780;
+    font-weight: 840;
     color: #f5f8fb;
     text-wrap: balance;
   }
 
-  .pager-supporting {
+  .pager-v4-supporting {
     margin: 24px 0 0;
-    max-width: 610px;
+    max-width: 620px;
     font-size: clamp(15px, 1.65vw, 21px);
     line-height: 1.55;
     letter-spacing: -0.015em;
@@ -180,70 +193,98 @@ html,body{margin:0;background:#03060b;color:#fff;}
     text-wrap: pretty;
   }
 
-  .pager-principle {
+  .pager-v4-context-title {
     left: clamp(22px, 5vw, 64px);
-    bottom: clamp(100px, 16vh, 170px);
-    width: min(560px, calc(100vw - 44px));
+    top: 43%;
+    transform: translateY(-50%) translate3d(0, 18px, 0);
+    width: min(650px, calc(100vw - 44px));
   }
 
-  .pager-principle h2 {
+  .pager-v4-context-title.is-active {
+    transform: translateY(-50%) translate3d(0, 0, 0);
+  }
+
+  .pager-v4-kicker {
+    margin: 0 0 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: clamp(11px, 1vw, 13px);
+    line-height: 1.4;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(168,190,221,0.86);
+  }
+
+  .pager-v4-title {
     margin: 0;
-    font-size: clamp(36px, 6vw, 74px);
-    line-height: 0.96;
-    letter-spacing: -0.06em;
-    font-weight: 780;
+    font-size: clamp(44px, 7vw, 92px);
+    line-height: 0.93;
+    letter-spacing: -0.075em;
+    font-weight: 880;
     color: #f7faff;
+    text-wrap: balance;
   }
 
-  .pager-principle p {
-    margin: 18px 0 0;
-    width: min(430px, 100%);
-    font-size: clamp(14px, 1.45vw, 18px);
-    line-height: 1.54;
-    color: rgba(196,214,240,0.78);
+  .pager-v4-context-copy {
+    margin: 22px 0 0;
+    max-width: 520px;
+    font-size: clamp(15px, 1.55vw, 19px);
+    line-height: 1.5;
+    color: rgba(196,214,240,0.82);
+    letter-spacing: -0.012em;
   }
 
-  .pager-profile-map {
+  .pager-v4-profile-map {
     position: absolute;
     inset: 0;
-    z-index: 6;
+    z-index: 9;
     pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 360ms ease, visibility 0s linear 360ms;
   }
 
-  .pager-person-label {
+  .pager-story-v4[data-mode="bubbles"] .pager-v4-profile-map {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s, 0s;
+  }
+
+  .pager-v4-bubble {
     position: absolute;
     display: grid;
     gap: 8px;
-    opacity: 0.18;
-    transform: translate3d(0, 8px, 0) scale(0.98);
-    transition: opacity 520ms ease, transform 520ms ease;
+    opacity: 0;
+    transform: translate3d(var(--enter-x,0), 22px, 0) scale(0.94);
+    filter: blur(10px);
+    transition:
+      opacity 520ms cubic-bezier(.22,.61,.36,1),
+      transform 720ms cubic-bezier(.16,1,.3,1),
+      filter 720ms ease;
   }
 
-  .pager-person-label.is-visible {
-    opacity: 0.58;
-    transform: translate3d(0,0,0) scale(1);
-  }
-
-  .pager-person-label.is-active {
+  .pager-story-v4[data-mode="bubbles"] .pager-v4-bubble {
     opacity: 1;
-    transform: translate3d(0,0,0) scale(1.02);
+    transform: translate3d(0,0,0) scale(1);
+    filter: blur(0);
+    transition-delay: var(--bubble-delay, 0ms), var(--bubble-delay, 0ms), var(--bubble-delay, 0ms);
   }
 
-  .pager-person-label__name {
+  .pager-v4-profile-name {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     width: max-content;
+    padding-left: 3px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 11px;
     line-height: 1;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.10em;
     color: var(--profile-color);
     text-transform: uppercase;
-    text-shadow: 0 0 28px color-mix(in srgb, var(--profile-color) 52%, transparent);
+    text-shadow: 0 0 26px color-mix(in srgb, var(--profile-color) 42%, transparent);
   }
 
-  .pager-person-label__name::before {
+  .pager-v4-profile-name::before {
     content: "";
     width: 7px;
     height: 7px;
@@ -252,127 +293,161 @@ html,body{margin:0;background:#03060b;color:#fff;}
     box-shadow: 0 0 22px var(--profile-color);
   }
 
-  .pager-bubble {
+  .pager-v4-message {
     position: relative;
     width: max-content;
-    max-width: 330px;
-    min-width: 210px;
-    padding: 14px 16px 13px;
-    border-radius: 15px;
-    border: 1px solid color-mix(in srgb, var(--profile-color) 54%, rgba(255,255,255,0.08));
-    background: linear-gradient(180deg, rgba(9,13,20,0.78), rgba(9,13,20,0.56));
-    backdrop-filter: blur(18px);
+    min-width: 236px;
+    max-width: 390px;
+    padding: 17px 19px 15px;
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--profile-color) 38%, rgba(255,255,255,0.08));
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--profile-color) 12%, rgba(12,17,26,0.84)), rgba(8,12,20,0.66)),
+      rgba(8,12,20,0.62);
+    backdrop-filter: blur(22px) saturate(1.18);
     box-shadow:
-      0 24px 70px rgba(0,0,0,0.38),
-      0 0 55px color-mix(in srgb, var(--profile-color) 20%, transparent),
-      inset 0 1px 0 rgba(255,255,255,0.06);
+      0 30px 90px rgba(0,0,0,0.45),
+      0 0 0 1px rgba(255,255,255,0.035),
+      0 0 62px color-mix(in srgb, var(--profile-color) 18%, transparent),
+      inset 0 1px 0 rgba(255,255,255,0.11),
+      inset 0 -20px 48px rgba(0,0,0,0.20);
+    overflow: visible;
   }
 
-  .pager-bubble::after {
+  .pager-v4-message::before {
     content: "";
     position: absolute;
-    width: 14px;
-    height: 14px;
-    left: 26px;
-    bottom: -7px;
-    transform: rotate(45deg);
-    background: rgba(9,13,20,0.62);
-    border-right: 1px solid color-mix(in srgb, var(--profile-color) 44%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--profile-color) 44%, transparent);
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(118deg, rgba(255,255,255,0.20), transparent 25%, transparent 72%, color-mix(in srgb, var(--profile-color) 22%, transparent));
+    opacity: 0.30;
   }
 
-  .pager-bubble__message {
+  .pager-v4-message::after {
+    content: "";
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    left: var(--tail-left, 30px);
+    right: var(--tail-right, auto);
+    bottom: -8px;
+    transform: rotate(45deg);
+    border-right: 1px solid color-mix(in srgb, var(--profile-color) 44%, rgba(255,255,255,0.08));
+    border-bottom: 1px solid color-mix(in srgb, var(--profile-color) 44%, rgba(255,255,255,0.08));
+    background: color-mix(in srgb, var(--profile-color) 7%, rgba(8,12,20,0.88));
+    backdrop-filter: blur(22px);
+  }
+
+  .pager-v4-message-text {
+    position: relative;
+    z-index: 1;
     min-height: 1.18em;
     margin: 0;
-    font-size: clamp(22px, 2.2vw, 34px);
-    line-height: 1.14;
-    letter-spacing: -0.045em;
-    font-weight: 780;
+    font-size: clamp(24px, 2.45vw, 38px);
+    line-height: 1.12;
+    letter-spacing: -0.055em;
+    font-weight: 880;
     color: #f7faff;
+    text-shadow: 0 8px 34px rgba(0,0,0,0.42);
   }
 
-  .pager-bubble__message::after {
+  .pager-v4-message-text.is-typing::after {
     content: "";
     display: inline-block;
     width: 7px;
     height: 1.03em;
-    margin-left: 4px;
+    margin-left: 5px;
     vertical-align: -0.15em;
     background: var(--profile-color);
-    opacity: var(--typing-caret, 0);
-    animation: pagerCaret 800ms steps(1) infinite;
+    animation: pagerV4Caret 820ms steps(1) infinite;
+    box-shadow: 0 0 16px var(--profile-color);
   }
 
-  .pager-person-label.is-active .pager-bubble__message::after { --typing-caret: 1; }
+  @keyframes pagerV4Caret { 0%, 48% { opacity: 1; } 49%, 100% { opacity: 0; } }
 
-  @keyframes pagerCaret { 0%, 48% { opacity: 1; } 49%, 100% { opacity: 0; } }
-
-  .pager-bubble__access {
-    margin-top: 10px;
+  .pager-v4-access {
+    position: relative;
+    z-index: 1;
+    margin-top: 11px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 11px;
     line-height: 1.3;
-    letter-spacing: 0.05em;
-    color: rgba(196,214,240,0.82);
+    letter-spacing: 0.055em;
+    color: rgba(196,214,240,0.86);
   }
 
-  .pager-profile-personal { --profile-color: var(--profile-personal); left: 9%; top: 58%; }
-  .pager-profile-work { --profile-color: var(--profile-work); left: 34%; top: 42%; }
-  .pager-profile-guest { --profile-color: var(--profile-guest); left: 60%; top: 62%; }
-  .pager-profile-alter { --profile-color: var(--profile-alter); right: 7%; top: 52%; }
-  .pager-profile-alter .pager-bubble::after { left: auto; right: 32px; }
-
-  .pager-step-indicator {
-    position: absolute;
-    z-index: 9;
-    left: 50%;
-    bottom: max(18px, env(safe-area-inset-bottom));
-    transform: translateX(-50%);
-    display: inline-flex;
-    gap: 8px;
-    padding: 7px 9px;
-    border: 1px solid rgba(168,190,221,0.16);
-    border-radius: 999px;
-    background: rgba(3,6,11,0.34);
-    backdrop-filter: blur(14px);
+  .pager-v4-access::before {
+    content: "";
+    width: 16px;
+    height: 1px;
+    background: color-mix(in srgb, var(--profile-color) 70%, rgba(196,214,240,0.24));
+    box-shadow: 0 0 14px var(--profile-color);
   }
 
-  .pager-step-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 999px;
-    background: rgba(168,190,221,0.28);
-    transition: width 260ms ease, background 260ms ease, opacity 260ms ease;
+  .pager-v4-personal {
+    --profile-color: var(--profile-personal);
+    --bubble-delay: 0ms;
+    --enter-x: -12px;
+    --tail-left: 28px;
+    left: 8.6%;
+    top: 58%;
   }
 
-  .pager-step-dot.is-active {
-    width: 22px;
-    background: var(--pager-soft);
+  .pager-v4-work {
+    --profile-color: var(--profile-work);
+    --bubble-delay: 55ms;
+    --enter-x: -8px;
+    --tail-left: 28px;
+    left: 33.4%;
+    top: 42%;
   }
 
-  .pager-cta {
+  .pager-v4-guest {
+    --profile-color: var(--profile-guest);
+    --bubble-delay: 90ms;
+    --enter-x: 8px;
+    --tail-left: 30px;
+    left: 59.6%;
+    top: 63%;
+  }
+
+  .pager-v4-alter {
+    --profile-color: var(--profile-alter);
+    --bubble-delay: 125ms;
+    --enter-x: 12px;
+    --tail-left: auto;
+    --tail-right: 32px;
+    right: 6.6%;
+    top: 53%;
+  }
+
+  .pager-v4-cta {
     right: clamp(22px, 5vw, 64px);
     bottom: max(72px, calc(env(safe-area-inset-bottom) + 72px));
-    width: min(470px, calc(100vw - 44px));
+    width: min(500px, calc(100vw - 44px));
     pointer-events: auto;
   }
 
-  .pager-cta-title {
+  .pager-v4-cta-title {
     margin: 0 0 18px;
     font-size: clamp(28px, 4.3vw, 52px);
     line-height: 1.02;
     letter-spacing: -0.055em;
-    font-weight: 780;
+    font-weight: 840;
     color: #f7faff;
   }
 
-  .pager-cta-row {
+  .pager-v4-cta-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 
-  .pager-btn {
+  .pager-v4-btn {
     min-height: 56px;
     border-radius: 10px;
     display: inline-flex;
@@ -389,24 +464,24 @@ html,body{margin:0;background:#03060b;color:#fff;}
     transition: transform 160ms ease, opacity 160ms ease, border-color 160ms ease;
   }
 
-  .pager-btn:active { transform: translateY(1px); }
-  .pager-btn::after { content: "→"; font-size: 20px; line-height: 1; }
+  .pager-v4-btn:active { transform: translateY(1px); }
+  .pager-v4-btn::after { content: "→"; font-size: 20px; line-height: 1; }
 
-  .pager-btn-primary {
+  .pager-v4-btn-primary {
     color: #07101c;
     background: var(--pager-soft);
     border: 1px solid rgba(196,214,240,0.70);
     box-shadow: 0 20px 70px rgba(196,214,240,0.18);
   }
 
-  .pager-btn-secondary {
+  .pager-v4-btn-secondary {
     color: rgba(244,247,251,0.94);
     background: rgba(3,6,11,0.40);
     border: 1px solid rgba(168,190,221,0.38);
     backdrop-filter: blur(14px);
   }
 
-  .pager-dates {
+  .pager-v4-dates {
     margin-top: 14px;
     display: grid;
     gap: 6px;
@@ -417,9 +492,37 @@ html,body{margin:0;background:#03060b;color:#fff;}
     color: rgba(168,190,221,0.80);
   }
 
-  .pager-scroll-hint {
+  .pager-v4-indicator {
     position: absolute;
-    z-index: 8;
+    z-index: 24;
+    left: 50%;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    display: inline-flex;
+    gap: 8px;
+    padding: 7px 9px;
+    border: 1px solid rgba(168,190,221,0.16);
+    border-radius: 999px;
+    background: rgba(3,6,11,0.34);
+    backdrop-filter: blur(14px);
+  }
+
+  .pager-v4-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(168,190,221,0.28);
+    transition: width 260ms ease, background 260ms ease, opacity 260ms ease;
+  }
+
+  .pager-v4-dot.is-active {
+    width: 22px;
+    background: var(--pager-soft);
+  }
+
+  .pager-v4-scroll-hint {
+    position: absolute;
+    z-index: 23;
     left: clamp(22px, 5vw, 64px);
     bottom: max(20px, env(safe-area-inset-bottom));
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -431,143 +534,147 @@ html,body{margin:0;background:#03060b;color:#fff;}
   }
 
   @media (max-width: 760px) {
-    .pager-snap-hero { min-height: 100svh; }
-    .pager-snap-video { transform: scale(1.25); object-position: center center; }
-    .pager-snap-system { display: none; }
-    .pager-snap-topbar { left: 18px; right: 18px; }
-    .pager-intro { left: 18px; top: 92px; width: calc(100vw - 36px); }
-    .pager-headline { font-size: clamp(34px, 10vw, 46px); line-height: 0.98; letter-spacing: -0.058em; }
-    .pager-supporting { font-size: 15px; margin-top: 18px; max-width: 340px; }
-    .pager-principle { left: 18px; right: 18px; bottom: 96px; width: auto; }
-    .pager-principle h2 { font-size: clamp(34px, 11vw, 48px); }
-    .pager-principle p { max-width: 310px; }
-    .pager-bubble { min-width: 188px; max-width: 238px; padding: 12px 13px 11px; border-radius: 13px; }
-    .pager-bubble__message { font-size: 19px; line-height: 1.14; }
-    .pager-bubble__access { font-size: 10px; }
+    .pager-story-v4 { min-height: 100svh; }
+    .pager-v4-video { transform: scale(1.25); object-position: center center; }
+    .pager-v4-system { display: none; }
+    .pager-v4-topbar { left: 18px; right: 18px; }
+    .pager-v4-intro { left: 18px; top: 90px; width: calc(100vw - 36px); }
+    .pager-v4-headline { font-size: clamp(33px, 10vw, 46px); line-height: 0.98; letter-spacing: -0.058em; }
+    .pager-v4-supporting { font-size: 15px; margin-top: 18px; max-width: 340px; }
+    .pager-v4-context-title { left: 18px; top: 43%; width: calc(100vw - 36px); }
+    .pager-v4-title { font-size: clamp(42px, 14vw, 58px); line-height: .95; letter-spacing: -0.07em; }
+    .pager-v4-context-copy { font-size: 15px; max-width: 330px; }
+    .pager-v4-message { min-width: 178px; max-width: 244px; padding: 12px 13px 11px; border-radius: 14px; }
+    .pager-v4-message-text { font-size: 19px; line-height: 1.14; }
+    .pager-v4-access { font-size: 10px; margin-top: 8px; gap: 7px; }
+    .pager-v4-profile-name { font-size: 10px; }
 
-    /* Mobile bubble positions: keep them inside the cropped vertical video. */
-    .pager-profile-personal { left: 18px; top: 52%; }
-    .pager-profile-work { left: 18px; top: 45%; }
-    .pager-profile-guest { right: 18px; left: auto; top: 55%; }
-    .pager-profile-alter { right: 18px; top: 48%; }
+    .pager-v4-personal { left: 16px; top: 52%; }
+    .pager-v4-work { left: 18px; top: 40%; }
+    .pager-v4-guest { right: 16px; left: auto; top: 55%; }
+    .pager-v4-alter { right: 16px; top: 44%; }
 
-    .pager-cta { left: 18px; right: 18px; bottom: max(64px, calc(env(safe-area-inset-bottom) + 64px)); width: auto; }
-    .pager-cta-row { grid-template-columns: 1fr; }
-    .pager-btn { min-height: 56px; }
-    .pager-scroll-hint { display: none; }
+    .pager-v4-cta { left: 18px; right: 18px; bottom: max(64px, calc(env(safe-area-inset-bottom) + 64px)); width: auto; }
+    .pager-v4-cta-row { grid-template-columns: 1fr; }
+    .pager-v4-btn { min-height: 56px; }
+    .pager-v4-scroll-hint { display: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .pager-step, .pager-person-label { transition: none; }
-    .pager-bubble__message::after { display: none; }
+    .pager-v4-step, .pager-v4-bubble { transition: none; }
+    .pager-v4-message-text.is-typing::after { display: none; }
   }
 </style>
 
-<section class="pager-snap-hero" id="pagerSnapHero" aria-label="PAGER cinematic storyscroll">
+<section class="pager-story-v4" id="pagerStoryV4" data-mode="intro" aria-label="PAGER cinematic storyscroll">
   <video
-    class="pager-snap-video"
-    id="pagerSnapVideo"
+    class="pager-v4-video"
+    id="pagerVideoV4"
     src="https://raw.githubusercontent.com/martynov1982/pagerapp/main/assets/PURE_CINEMATIC_LIVE_ACTION_FOO.mp4"
     muted
     playsinline
     preload="auto"
   ></video>
 
-  <div class="pager-snap-shade"></div>
-  <div class="pager-snap-grain"></div>
+  <div class="pager-v4-shade"></div>
+  <div class="pager-v4-grain"></div>
 
-  <div class="pager-snap-topbar">
-    <div class="pager-snap-mark"><span>P</span>PAGER</div>
-    <div class="pager-snap-system">ACCESS / 04 MODES</div>
+  <div class="pager-v4-topbar">
+    <div class="pager-v4-mark"><span>P</span>PAGER</div>
+    <div class="pager-v4-system">ACCESS / 04 MODES</div>
   </div>
 
-  <div class="pager-snap-layer">
-    <section class="pager-step pager-intro is-active" data-step="0">
-      <p class="pager-eyebrow">Новая модель приватного общения</p>
-      <h1 class="pager-headline">Мессенджеры сделали нас доступными для всех.<br>Мы даём возможность управлять доступом.</h1>
-      <p class="pager-supporting">Приватность — это не значит скрыться от всех. Это возможность открываться по-разному: для близких, для работы или для временного общения.</p>
+  <div class="pager-v4-layer">
+    <section class="pager-v4-step pager-v4-intro is-active" data-step="0">
+      <p class="pager-v4-eyebrow">Новая модель приватного общения</p>
+      <h1 class="pager-v4-headline">Мессенджеры сделали нас доступными для всех.<br>Мы даём возможность управлять доступом.</h1>
+      <p class="pager-v4-supporting">Приватность — это не значит скрыться от всех. Это возможность открываться по-разному: для близких, для работы или для временного общения.</p>
     </section>
 
-    <section class="pager-step pager-principle" data-step="1">
-      <p class="pager-eyebrow">MULTIPROFILE / CONTEXT ACCESS</p>
-      <h2>Один человек.<br>Несколько контекстов общения.</h2>
-      <p>Профиль определяет, каким образом контакт видит вас и какие способы связи ему доступны.</p>
+    <section class="pager-v4-step pager-v4-context-title" data-step="1">
+      <p class="pager-v4-kicker">MULTIPROFILE / CONTEXT ACCESS</p>
+      <h2 class="pager-v4-title">Один Я - разный Я.</h2>
+      <p class="pager-v4-context-copy">Профиль определяет, каким образом контакт видит вас и какие способы связи ему доступны.</p>
     </section>
 
-    <div class="pager-profile-map" aria-label="Профили общения">
-      <div class="pager-person-label pager-profile-personal" data-profile="personal">
-        <div class="pager-person-label__name">Личное</div>
-        <div class="pager-bubble">
-          <p class="pager-bubble__message" data-full="Ты дома?"></p>
-          <div class="pager-bubble__access">Текст · Аудио · Видео</div>
+    <div class="pager-v4-profile-map" aria-label="Профили общения">
+      <div class="pager-v4-bubble pager-v4-personal" data-profile="personal">
+        <div class="pager-v4-profile-name">Личное</div>
+        <div class="pager-v4-message">
+          <p class="pager-v4-message-text" data-text="Ты дома?"></p>
+          <div class="pager-v4-access">Текст · Аудио · Видео</div>
         </div>
       </div>
 
-      <div class="pager-person-label pager-profile-work" data-profile="work">
-        <div class="pager-person-label__name">Работа</div>
-        <div class="pager-bubble">
-          <p class="pager-bubble__message" data-full="Подтверди встречу на 15:00"></p>
-          <div class="pager-bubble__access">Текст · Аудио</div>
+      <div class="pager-v4-bubble pager-v4-work" data-profile="work">
+        <div class="pager-v4-profile-name">Работа</div>
+        <div class="pager-v4-message">
+          <p class="pager-v4-message-text" data-text="Подтверди встречу на 15:00"></p>
+          <div class="pager-v4-access">Текст · Аудио</div>
         </div>
       </div>
 
-      <div class="pager-person-label pager-profile-guest" data-profile="guest">
-        <div class="pager-person-label__name">Гость</div>
-        <div class="pager-bubble">
-          <p class="pager-bubble__message" data-full="Курьер будет через 10 минут"></p>
-          <div class="pager-bubble__access">Только текст · 24 часа</div>
+      <div class="pager-v4-bubble pager-v4-guest" data-profile="guest">
+        <div class="pager-v4-profile-name">Гость</div>
+        <div class="pager-v4-message">
+          <p class="pager-v4-message-text" data-text="Курьер будет через 10 минут"></p>
+          <div class="pager-v4-access">Только текст · 24 часа</div>
         </div>
       </div>
 
-      <div class="pager-person-label pager-profile-alter" data-profile="alter">
-        <div class="pager-person-label__name">Альтер эго</div>
-        <div class="pager-bubble">
-          <p class="pager-bubble__message" data-full="Есть одна мысль"></p>
-          <div class="pager-bubble__access">Текст · Аудио</div>
+      <div class="pager-v4-bubble pager-v4-alter" data-profile="alter">
+        <div class="pager-v4-profile-name">Альтер эго</div>
+        <div class="pager-v4-message">
+          <p class="pager-v4-message-text" data-text="Есть одна мысль"></p>
+          <div class="pager-v4-access">Текст · Аудио</div>
         </div>
       </div>
     </div>
 
-    <section class="pager-step pager-cta" data-step="6">
-      <h2 class="pager-cta-title">Один человек.<br>Четыре контекста общения.</h2>
-      <div class="pager-cta-row">
-        <a class="pager-btn pager-btn-primary" href="#request">Запросить презентацию</a>
-        <a class="pager-btn pager-btn-secondary" href="#mechanics">Посмотреть механику</a>
+    <section class="pager-v4-step pager-v4-cta" data-step="3">
+      <h2 class="pager-v4-cta-title">Один человек.<br>Четыре контекста общения.</h2>
+      <div class="pager-v4-cta-row">
+        <a class="pager-v4-btn pager-v4-btn-primary" href="#request">Запросить презентацию</a>
+        <a class="pager-v4-btn pager-v4-btn-secondary" href="#mechanics">Посмотреть механику</a>
       </div>
-      <div class="pager-dates">
+      <div class="pager-v4-dates">
         <span>Private beta · Q3 2026</span>
         <span>App Store / Google Play · Q1 2027</span>
       </div>
     </section>
   </div>
 
-  <div class="pager-scroll-hint">scroll / next state</div>
-  <div class="pager-step-indicator" id="pagerStepIndicator" aria-hidden="true"></div>
+  <div class="pager-v4-scroll-hint">scroll / next state</div>
+  <div class="pager-v4-indicator" id="pagerIndicatorV4" aria-hidden="true"></div>
 </section>
 
 <script>
 (() => {
-  const root = document.getElementById('pagerSnapHero');
-  const video = document.getElementById('pagerSnapVideo');
-  const textSteps = Array.from(root.querySelectorAll('[data-step]'));
-  const labels = Array.from(root.querySelectorAll('[data-profile]'));
-  const indicator = document.getElementById('pagerStepIndicator');
+  const root = document.getElementById('pagerStoryV4');
+  if (!root) return;
 
+  const video = document.getElementById('pagerVideoV4');
+  const textSteps = Array.from(root.querySelectorAll('[data-step]'));
+  const messages = Array.from(root.querySelectorAll('.pager-v4-message-text'));
+  const indicator = document.getElementById('pagerIndicatorV4');
+
+  // Каждый шаг — это точка в видео. Один скролл запускает естественное
+  // проигрывание ролика до следующей точки. Без loop-сегментов.
   const steps = [
-    { time: 0.20, type: 'intro' },
-    { time: 2.10, type: 'principle' },
-    { time: 4.15, type: 'profile', profile: 'personal' },
-    { time: 5.55, type: 'profile', profile: 'work' },
-    { time: 6.95, type: 'profile', profile: 'guest' },
-    { time: 8.30, type: 'profile', profile: 'alter' },
-    { time: 9.65, type: 'cta' }
+    { mode: 'intro',   time: 2.00 },
+    { mode: 'title',   time: 6.05 },
+    { mode: 'bubbles', time: 7.70 },
+    { mode: 'cta',     time: 9.35 }
   ];
 
   let current = 0;
   let duration = 10;
   let animating = false;
   let touchY = 0;
-  let typeTimer = null;
+  let typingTimers = [];
+  let typingRun = 0;
+  let rafId = 0;
+  let transitionToken = 0;
 
   const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
   const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -579,77 +686,163 @@ html,body{margin:0;background:#03060b;color:#fff;}
     return r.top < window.innerHeight * 0.55 && r.bottom > window.innerHeight * 0.45;
   };
 
-  const clearTyping = () => {
-    if (typeTimer) window.clearTimeout(typeTimer);
-    typeTimer = null;
-    root.querySelectorAll('.pager-bubble__message').forEach(el => { el.textContent = ''; });
+  const clearTypingTimers = () => {
+    typingTimers.forEach(id => window.clearTimeout(id));
+    typingTimers = [];
   };
 
-  const typeInto = (el, text, i = 0) => {
-    el.textContent = text.slice(0, i);
-    if (i < text.length) {
-      typeTimer = window.setTimeout(() => typeInto(el, text, i + 1), 28 + Math.random() * 18);
-    }
-  };
-
-  const activateProfile = (profile) => {
-    labels.forEach(label => {
-      const active = label.dataset.profile === profile;
-      label.classList.toggle('is-visible', Boolean(profile));
-      label.classList.toggle('is-active', active);
-      const message = label.querySelector('.pager-bubble__message');
-      if (!active && message) message.textContent = '';
+  const resetMessages = () => {
+    clearTypingTimers();
+    typingRun += 1;
+    messages.forEach(el => {
+      el.textContent = '';
+      el.classList.remove('is-typing');
     });
-
-    if (!profile) return;
-    const activeLabel = labels.find(l => l.dataset.profile === profile);
-    const message = activeLabel && activeLabel.querySelector('.pager-bubble__message');
-    if (message) typeInto(message, message.dataset.full || '');
   };
 
-  const applyStep = (index) => {
-    const step = steps[index];
-    textSteps.forEach(el => el.classList.toggle('is-active', Number(el.dataset.step) === index));
+  const typeMessage = (el, text, run, i = 0) => {
+    if (run !== typingRun) return;
+    el.textContent = text.slice(0, i);
+    el.classList.add('is-typing');
 
-    clearTyping();
-    if (step.type === 'profile') {
-      activateProfile(step.profile);
-    } else if (step.type === 'cta') {
-      activateProfile('alter');
-      const alterMessage = root.querySelector('[data-profile="alter"] .pager-bubble__message');
-      if (alterMessage) alterMessage.textContent = alterMessage.dataset.full;
+    if (i < text.length) {
+      const id = window.setTimeout(() => typeMessage(el, text, run, i + 1), 20 + Math.random() * 10);
+      typingTimers.push(id);
     } else {
-      activateProfile(null);
+      const id = window.setTimeout(() => el.classList.remove('is-typing'), 620);
+      typingTimers.push(id);
     }
+  };
 
+  const typeAllBubbles = () => {
+    resetMessages();
+    typingRun += 1;
+    const run = typingRun;
+    messages.forEach((el, index) => {
+      const text = el.dataset.text || '';
+      // Почти одновременный набор во всех баблах.
+      const startDelay = 170 + index * 38;
+      const id = window.setTimeout(() => typeMessage(el, text, run, 0), startDelay);
+      typingTimers.push(id);
+    });
+  };
+
+  const setIndicator = (index) => {
+    if (!indicator) return;
     Array.from(indicator.children).forEach((dot, i) => dot.classList.toggle('is-active', i === index));
   };
 
-  const animateVideoTo = (targetTime, ms = 900) => {
+  const clearActiveStep = () => {
+    textSteps.forEach(el => el.classList.remove('is-active'));
+  };
+
+  const updateUI = (index) => {
+    const step = steps[index];
+    root.dataset.mode = step.mode;
+    clearActiveStep();
+    textSteps.forEach(el => el.classList.toggle('is-active', Number(el.dataset.step) === index));
+    setIndicator(index);
+
+    if (step.mode === 'bubbles') {
+      typeAllBubbles();
+    } else {
+      resetMessages();
+    }
+  };
+
+  const stopPlaybackWatch = () => {
+    if (rafId) window.cancelAnimationFrame(rafId);
+    rafId = 0;
+  };
+
+  const pauseAt = (time) => {
+    video.pause();
+    video.playbackRate = 1;
+    video.currentTime = clamp(time, 0, Math.max(0.1, duration - 0.05));
+  };
+
+  const seekSmoothTo = (targetTime, ms = 520, onDone) => {
+    stopPlaybackWatch();
     const start = video.currentTime || 0;
     const target = clamp(targetTime, 0, Math.max(0.1, duration - 0.05));
     const startTime = performance.now();
-    animating = true;
+    video.pause();
 
     const frame = (now) => {
       const t = clamp((now - startTime) / ms, 0, 1);
       video.currentTime = start + (target - start) * ease(t);
       if (t < 1) {
-        requestAnimationFrame(frame);
+        rafId = requestAnimationFrame(frame);
       } else {
-        video.currentTime = target;
-        window.setTimeout(() => { animating = false; }, 120);
+        rafId = 0;
+        pauseAt(target);
+        if (onDone) onDone();
       }
     };
-    requestAnimationFrame(frame);
+    rafId = requestAnimationFrame(frame);
+  };
+
+  const playForwardTo = (targetTime, onDone) => {
+    stopPlaybackWatch();
+    const target = clamp(targetTime, 0, Math.max(0.1, duration - 0.05));
+
+    // Если точка уже позади — плавно возвращаемся к ней, иначе проигрываем видео вперёд.
+    if ((video.currentTime || 0) > target - 0.06) {
+      seekSmoothTo(target, 520, onDone);
+      return;
+    }
+
+    video.playbackRate = 1.18;
+    const p = video.play();
+    if (p && typeof p.catch === 'function') {
+      p.catch(() => {
+        // Фоллбек для браузеров, где play заблокирован: мягко доскрабить до точки.
+        seekSmoothTo(target, 720, onDone);
+      });
+    }
+
+    const startedAt = performance.now();
+    const tick = () => {
+      const now = performance.now();
+      const stalledTooLong = now - startedAt > 4800;
+      if (video.currentTime >= target - 0.035 || stalledTooLong) {
+        stopPlaybackWatch();
+        pauseAt(target);
+        if (onDone) onDone();
+        return;
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
   };
 
   const goTo = (next) => {
     next = clamp(next, 0, steps.length - 1);
-    if (next === current) return;
-    current = next;
-    applyStep(current);
-    animateVideoTo(steps[current].time, current === 0 ? 700 : 960);
+    if (next === current || animating) return;
+
+    const targetStep = steps[next];
+    const token = ++transitionToken;
+    animating = true;
+
+    // На время движения к следующей точке убираем текущую типографику,
+    // чтобы следующий смысл появился уже в нужном кадре видео.
+    root.dataset.mode = 'transition';
+    clearActiveStep();
+    resetMessages();
+    setIndicator(next);
+
+    const finish = () => {
+      if (token !== transitionToken) return;
+      current = next;
+      animating = false;
+      updateUI(current);
+    };
+
+    if (targetStep.time >= (video.currentTime || 0)) {
+      playForwardTo(targetStep.time, finish);
+    } else {
+      seekSmoothTo(targetStep.time, 560, finish);
+    }
   };
 
   const releaseScroll = (direction) => {
@@ -705,26 +898,25 @@ html,body{margin:0;background:#03060b;color:#fff;}
 
   steps.forEach((_, i) => {
     const dot = document.createElement('span');
-    dot.className = 'pager-step-dot' + (i === 0 ? ' is-active' : '');
+    dot.className = 'pager-v4-dot' + (i === 0 ? ' is-active' : '');
     indicator.appendChild(dot);
   });
 
   video.addEventListener('loadedmetadata', () => {
     duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 10;
-    video.pause();
-    video.currentTime = steps[0].time;
+    pauseAt(steps[0].time);
+    current = 0;
+    updateUI(0);
   });
-
-  // Unlock seeking on mobile browsers.
-  video.play().then(() => video.pause()).catch(() => {});
 
   window.addEventListener('wheel', onWheel, { passive: false });
   window.addEventListener('touchstart', onTouchStart, { passive: true });
   window.addEventListener('touchend', onTouchEnd, { passive: false });
   window.addEventListener('resize', setVH, { passive: true });
+  window.addEventListener('blur', () => { video.pause(); });
 
   setVH();
-  applyStep(0);
+  updateUI(0);
 })();
 </script>
 <section class="after"><div><h2>Следующий блок страницы</h2><p>После последнего шага скролл отпускается дальше.</p></div></section>
