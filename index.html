@@ -708,12 +708,15 @@ html,body{margin:0;background:#03060b;color:#fff;}
   const messages = Array.from(root.querySelectorAll('.pager-v4-message-text'));
 
   // Прогресс размечен как доли [0..1] от общей высоты скролл-трека —
-  // не завязано на конкретную длительность видео или пиксельные величины.
+  // не завязано на пиксельные величины. timeFrac — контрольная точка
+  // видео (доля от его длительности), к которой ролик доезжает ОДИН РАЗ
+  // при входе в шаг и затем стоит на паузе — видео НЕ тянется
+  // непрерывно за скроллом внутри шага.
   const steps = [
-    { mode: 'intro',   frac: 0.00, label: 'Начало' },
-    { mode: 'context', frac: 0.32, label: 'Контекстный доступ' },
-    { mode: 'bubbles', frac: 0.60, label: 'Профили общения' },
-    { mode: 'cta',     frac: 0.84, label: 'Призыв к действию' }
+    { mode: 'intro',   frac: 0.00, timeFrac: 0.00, label: 'Начало' },
+    { mode: 'context', frac: 0.32, timeFrac: 0.35, label: 'Контекстный доступ' },
+    { mode: 'bubbles', frac: 0.60, timeFrac: 0.72, label: 'Профили общения' },
+    { mode: 'cta',     frac: 0.84, timeFrac: 0.95, label: 'Призыв к действию' }
   ];
 
   const stepEls = {
@@ -732,11 +735,51 @@ html,body{margin:0;background:#03060b;color:#fff;}
   let videoReady = false;
   let wrapTop = 0;
   let wrapHeight = 0;
+  let seekRafId = 0;
+  let seekToken = 0;
 
   const reducedMotionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   const prefersReducedMotion = () => !!(reducedMotionQuery && reducedMotionQuery.matches);
 
   const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+  const easeInOutCubic = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  // Плавно доезжает currentTime видео до контрольной точки шага и
+  // останавливается там (пауза) — это единственное место, где видео
+  // двигается. Скролл внутри шага на видео больше не влияет.
+  function animateVideoTo(targetTime) {
+    if (!videoReady) return;
+    const token = ++seekToken;
+    if (seekRafId) window.cancelAnimationFrame(seekRafId);
+
+    const target = clamp(targetTime, 0, Math.max(0.05, duration - 0.05));
+    const start = video.currentTime || 0;
+    const distance = Math.abs(target - start);
+
+    if (prefersReducedMotion() || distance < 0.03) {
+      video.currentTime = target;
+      video.pause();
+      return;
+    }
+
+    const durationMs = clamp(distance * 260, 260, 900);
+    const startedAt = performance.now();
+    video.pause();
+
+    const frame = (now) => {
+      if (token !== seekToken) return;
+      const t = clamp((now - startedAt) / durationMs, 0, 1);
+      video.currentTime = start + (target - start) * easeInOutCubic(t);
+      if (t < 1) {
+        seekRafId = window.requestAnimationFrame(frame);
+      } else {
+        seekRafId = 0;
+        video.currentTime = target;
+        video.pause();
+      }
+    };
+    seekRafId = window.requestAnimationFrame(frame);
+  }
 
   function measure() {
     wrapTop = wrap.getBoundingClientRect().top + window.scrollY;
@@ -817,6 +860,8 @@ html,body{margin:0;background:#03060b;color:#fff;}
     } else if (leavingBubbles) {
       resetBubblesToStatic();
     }
+
+    animateVideoTo(steps[index].timeFrac * duration);
   }
 
   function updateFromScroll() {
@@ -826,10 +871,7 @@ html,body{margin:0;background:#03060b;color:#fff;}
     const scrollable = wrapHeight - window.innerHeight;
     const progress = clamp((window.scrollY - wrapTop) / scrollable, 0, 1);
 
-    if (videoReady && duration > 0) {
-      video.currentTime = progress * duration * 0.999;
-    }
-
+    // Скролл решает только КАКОЙ сейчас шаг — не двигает видео напрямую.
     applyStep(pickStepIndex(progress));
   }
 
@@ -880,7 +922,14 @@ html,body{margin:0;background:#03060b;color:#fff;}
     videoReady = duration > 0;
     video.pause();
     measure();
-    updateFromScroll();
+    const scrollable = wrapHeight - window.innerHeight;
+    const progress = scrollable > 0 ? clamp((window.scrollY - wrapTop) / scrollable, 0, 1) : 0;
+    const targetIndex = pickStepIndex(progress);
+    // Видео стало готово позже, чем определился текущий шаг — досылаем
+    // его на нужную контрольную точку принудительно, даже если индекс
+    // шага не изменился с момента инициализации.
+    if (videoReady) animateVideoTo(steps[targetIndex].timeFrac * duration);
+    applyStep(targetIndex);
   });
 
   video.addEventListener('error', onVideoError);
