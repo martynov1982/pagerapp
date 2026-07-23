@@ -87,6 +87,7 @@ html,body{margin:0;background:#03060b;color:#fff;}
     min-height: 560px;
     overflow: hidden;
     isolation: isolate;
+    background: var(--pager-bg);
   }
 
   .pager-v4-video {
@@ -436,12 +437,30 @@ html,body{margin:0;background:#03060b;color:#fff;}
 
   .pager-enhanced .pager-v4-video {
     transform: scale(1.018);
-    will-change: filter;
-    transition: filter 820ms ease;
+    opacity: 1;
+    will-change: opacity, filter;
+    transition: opacity 900ms cubic-bezier(.22,.61,.36,1), filter 900ms ease;
   }
 
+  /* Первый шаг — чистая типографика, видео полностью скрыто. */
   .pager-enhanced .pager-story-v4[data-mode="intro"] .pager-v4-video {
-    filter: saturate(0.9) contrast(1.05) brightness(0.60);
+    opacity: 0;
+    filter: saturate(0.9) contrast(1.05) brightness(0.58);
+  }
+
+  /* Видео проявляется фейдом только при входе во второй шаг. */
+  .pager-enhanced .pager-story-v4[data-mode="context"] .pager-v4-video,
+  .pager-enhanced .pager-story-v4[data-mode="bubbles"] .pager-v4-video,
+  .pager-enhanced .pager-story-v4[data-mode="cta"] .pager-v4-video {
+    opacity: 1;
+    filter: saturate(0.98) contrast(1.08) brightness(0.74);
+  }
+
+  .pager-enhanced .pager-story-v4[data-mode="intro"] .pager-v4-shade {
+    background:
+      radial-gradient(circle at 72% 22%, rgba(168,190,221,0.08), transparent 34%),
+      radial-gradient(circle at 24% 78%, rgba(32,201,151,0.05), transparent 30%),
+      linear-gradient(180deg, rgba(3,6,11,0.98) 0%, rgba(3,6,11,0.94) 100%);
   }
 
   .pager-enhanced .pager-v4-shade { transition: background 520ms ease; }
