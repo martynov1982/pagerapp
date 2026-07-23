@@ -448,8 +448,9 @@ html,body{margin:0;background:#03060b;color:#fff;}
     filter: saturate(0.9) contrast(1.05) brightness(0.58);
   }
 
-  /* Видео проявляется фейдом только при входе во второй шаг. */
-  .pager-enhanced .pager-story-v4[data-mode="context"] .pager-v4-video,
+  /* Видео проявляется фейдом только при входе во второй шаг (title). */
+  .pager-enhanced .pager-story-v4[data-mode="title"] .pager-v4-video,
+  .pager-enhanced .pager-story-v4[data-mode="title-alt"] .pager-v4-video,
   .pager-enhanced .pager-story-v4[data-mode="bubbles"] .pager-v4-video,
   .pager-enhanced .pager-story-v4[data-mode="cta"] .pager-v4-video {
     opacity: 1;
@@ -511,14 +512,18 @@ html,body{margin:0;background:#03060b;color:#fff;}
 
   .pager-enhanced .pager-v4-headline { font-size: clamp(36px, 6.5vw, 82px); line-height: 0.98; }
 
-  .pager-enhanced .pager-v4-step[data-step="1"] {
+  .pager-enhanced .pager-v4-step[data-step="1"],
+  .pager-enhanced .pager-v4-step[data-step="2"] {
     left: clamp(22px, 5vw, 64px);
     top: 40%;
     transform: translateY(-50%) translate3d(0, 18px, 0);
     width: min(650px, calc(100vw - 44px));
   }
 
-  .pager-enhanced .pager-v4-step[data-step="1"].is-active {
+  .pager-enhanced .pager-v4-step[data-step="2"] { top: 44%; }
+
+  .pager-enhanced .pager-v4-step[data-step="1"].is-active,
+  .pager-enhanced .pager-v4-step[data-step="2"].is-active {
     transform: translateY(-50%) translate3d(0, 0, 0);
   }
 
@@ -612,6 +617,7 @@ html,body{margin:0;background:#03060b;color:#fff;}
     .pager-v4-intro { left: 18px; right: 18px; top: 90px; }
     .pager-v4-headline { font-size: clamp(30px, 10vw, 46px); line-height: 1.04; letter-spacing: -0.04em; }
     .pager-enhanced .pager-v4-step[data-step="1"] { left: 18px; top: 42%; width: calc(100vw - 36px); }
+    .pager-enhanced .pager-v4-step[data-step="2"] { left: 18px; top: 46%; width: calc(100vw - 36px); }
     .pager-v4-title { font-size: clamp(30px, 12vw, 44px); }
     .pager-v4-context-copy { font-size: 15px; max-width: 320px; }
     .pager-v4-message { max-width: 240px; padding: 12px 13px 11px; border-radius: 14px; }
@@ -661,11 +667,17 @@ html,body{margin:0;background:#03060b;color:#fff;}
 
     <section class="pager-v4-step" data-step="1">
       <p class="pager-v4-kicker">MULTIPROFILE / CONTEXT ACCESS</p>
-      <h2 class="pager-v4-title">Один я, но разный для каждого.</h2>
+      <h2 class="pager-v4-title">Один я...</h2>
       <p class="pager-v4-context-copy">Приватность — это не значит скрыться от всех. Это возможность открываться по-разному: для близких, для работы или для временного общения.</p>
     </section>
 
-    <div class="pager-v4-profile-map" data-step="2" aria-label="Профили общения">
+    <section class="pager-v4-step" data-step="2">
+      <p class="pager-v4-kicker">ONE IDENTITY / DIFFERENT ACCESS</p>
+      <h2 class="pager-v4-title">Один я,<br>но разный для каждого.</h2>
+      <p class="pager-v4-context-copy">Для каждого контакта можно открыть свой профиль и свой набор способов связи.</p>
+    </section>
+
+    <div class="pager-v4-profile-map" data-step="3" aria-label="Профили общения">
       <div class="pager-v4-bubble pager-v4-personal" data-profile="personal">
         <div class="pager-v4-profile-name">Личное</div>
         <div class="pager-v4-message">
@@ -699,7 +711,7 @@ html,body{margin:0;background:#03060b;color:#fff;}
       </div>
     </div>
 
-    <section class="pager-v4-cta" data-step="3">
+    <section class="pager-v4-cta" data-step="4">
       <h2 class="pager-v4-cta-title">Один человек. Четыре контекста общения.</h2>
       <div class="pager-v4-cta-row">
         <a class="pager-v4-btn pager-v4-btn-primary" href="#request">Запросить презентацию</a>
@@ -731,18 +743,26 @@ html,body{margin:0;background:#03060b;color:#fff;}
   // видео (доля от его длительности), к которой ролик доезжает ОДИН РАЗ
   // при входе в шаг и затем стоит на паузе — видео НЕ тянется
   // непрерывно за скроллом внутри шага.
+  // Прогресс размечен как доли [0..1] от общей высоты скролл-трека —
+  // не завязано на пиксельные величины. timeFrac — контрольная точка
+  // видео (доля от его длительности, взято из исходных таймингов
+  // 0 / 3.50 / 7.05 / 8.90 / 9.95 из ролика длиной 10с), к которой
+  // ролик доезжает ОДИН РАЗ при входе в шаг и затем стоит на паузе —
+  // видео НЕ тянется непрерывно за скроллом внутри шага.
   const steps = [
-    { mode: 'intro',   frac: 0.00, timeFrac: 0.00, label: 'Начало' },
-    { mode: 'context', frac: 0.32, timeFrac: 0.35, label: 'Контекстный доступ' },
-    { mode: 'bubbles', frac: 0.60, timeFrac: 0.72, label: 'Профили общения' },
-    { mode: 'cta',     frac: 0.84, timeFrac: 0.95, label: 'Призыв к действию' }
+    { mode: 'intro',     frac: 0.00, timeFrac: 0.000, label: 'Начало' },
+    { mode: 'title',     frac: 0.18, timeFrac: 0.350, label: 'Контекстный доступ' },
+    { mode: 'title-alt', frac: 0.40, timeFrac: 0.705, label: 'Профиль под контакт' },
+    { mode: 'bubbles',   frac: 0.64, timeFrac: 0.890, label: 'Профили общения' },
+    { mode: 'cta',       frac: 0.86, timeFrac: 0.995, label: 'Призыв к действию' }
   ];
 
   const stepEls = {
     0: root.querySelector('[data-step="0"]'),
     1: root.querySelector('[data-step="1"]'),
     2: root.querySelector('[data-step="2"]'),
-    3: root.querySelector('[data-step="3"]')
+    3: root.querySelector('[data-step="3"]'),
+    4: root.querySelector('[data-step="4"]')
   };
 
   let duration = 0;
@@ -766,8 +786,10 @@ html,body{margin:0;background:#03060b;color:#fff;}
   // Плавно доезжает currentTime видео до контрольной точки шага и
   // останавливается там (пауза) — это единственное место, где видео
   // двигается. Скролл внутри шага на видео больше не влияет.
-  function animateVideoTo(targetTime) {
-    if (!videoReady) return;
+  // onDone вызывается ровно один раз, когда ролик реально доехал —
+  // это нужно, чтобы следующий переход не стартовал поверх текущего.
+  function animateVideoTo(targetTime, onDone) {
+    if (!videoReady) { if (onDone) onDone(); return; }
     const token = ++seekToken;
     if (seekRafId) window.cancelAnimationFrame(seekRafId);
 
@@ -778,6 +800,7 @@ html,body{margin:0;background:#03060b;color:#fff;}
     if (prefersReducedMotion() || distance < 0.03) {
       video.currentTime = target;
       video.pause();
+      if (onDone) onDone();
       return;
     }
 
@@ -795,6 +818,7 @@ html,body{margin:0;background:#03060b;color:#fff;}
         seekRafId = 0;
         video.currentTime = target;
         video.pause();
+        if (onDone) onDone();
       }
     };
     seekRafId = window.requestAnimationFrame(frame);
@@ -805,10 +829,29 @@ html,body{margin:0;background:#03060b;color:#fff;}
     wrapHeight = wrap.offsetHeight;
   }
 
-  function pickStepIndex(progress) {
-    let idx = 0;
-    for (let i = 0; i < steps.length; i++) {
-      if (progress >= steps[i].frac) idx = i;
+  // Гистерезис: у каждой границы между шагами своя "мёртвая зона".
+  // Без неё естественное дрожание скролла (инерция трекпада, отскок)
+  // прямо на границе заставляло индекс шага мигать туда-обратно, а
+  // каждый мигание перезапускало анимацию видео — это и выглядело
+  // как "ускорение". Теперь переключение на новый шаг происходит
+  // один раз и не отменяется, пока скролл не отойдёт от границы
+  // на HYSTERESIS дальше, чем было пройдено при входе.
+  const HYSTERESIS = 0.03;
+
+  function resolveStepIndex(progress, currentIndex) {
+    if (currentIndex < 0) {
+      let idx = 0;
+      for (let i = 0; i < steps.length; i++) {
+        if (progress >= steps[i].frac) idx = i;
+      }
+      return idx;
+    }
+    let idx = currentIndex;
+    while (idx < steps.length - 1 && progress >= steps[idx + 1].frac + HYSTERESIS) {
+      idx++;
+    }
+    while (idx > 0 && progress < steps[idx].frac - HYSTERESIS) {
+      idx--;
     }
     return idx;
   }
@@ -856,8 +899,15 @@ html,body{margin:0;background:#03060b;color:#fff;}
     });
   }
 
-  function applyStep(index) {
-    if (index === currentStepIndex) return;
+  // isTransitioning — пока ролик едет к контрольной точке текущего
+  // перехода, новый переход не стартует поверх него (это и вызывало
+  // "ускорение": скролл продолжался, попытки переключить шаг
+  // накладывались друг на друга, каждая обрывала предыдущую анимацию
+  // на середине). Вместо этого мы ждём, пока текущий переход
+  // закончится, и только тогда проверяем, куда доскроллил пользователь.
+  let isTransitioning = false;
+
+  function commitStepUI(index) {
     const enteringBubbles = steps[index].mode === 'bubbles';
     const leavingBubbles = currentStepIndex >= 0 && steps[currentStepIndex].mode === 'bubbles';
 
@@ -879,19 +929,30 @@ html,body{margin:0;background:#03060b;color:#fff;}
     } else if (leavingBubbles) {
       resetBubblesToStatic();
     }
+  }
 
-    animateVideoTo(steps[index].timeFrac * duration);
+  function goToNearestPendingStep() {
+    if (wrapHeight <= window.innerHeight) return;
+    const scrollable = wrapHeight - window.innerHeight;
+    const progress = clamp((window.scrollY - wrapTop) / scrollable, 0, 1);
+    const nextIndex = resolveStepIndex(progress, currentStepIndex);
+    if (nextIndex === currentStepIndex) return;
+
+    isTransitioning = true;
+    commitStepUI(nextIndex);
+    animateVideoTo(steps[nextIndex].timeFrac * duration, () => {
+      isTransitioning = false;
+      // Пока ролик ехал, пользователь мог проскроллить ещё дальше —
+      // проверяем это и, если нужно, запускаем следующий переход тем
+      // же чистым, последовательным способом (а не догоняем рывком).
+      goToNearestPendingStep();
+    });
   }
 
   function updateFromScroll() {
     ticking = false;
-    if (wrapHeight <= window.innerHeight) return;
-
-    const scrollable = wrapHeight - window.innerHeight;
-    const progress = clamp((window.scrollY - wrapTop) / scrollable, 0, 1);
-
-    // Скролл решает только КАКОЙ сейчас шаг — не двигает видео напрямую.
-    applyStep(pickStepIndex(progress));
+    if (isTransitioning) return; // текущий переход доиграет и сам перепроверит прогресс
+    goToNearestPendingStep();
   }
 
   function onScroll() {
@@ -941,21 +1002,26 @@ html,body{margin:0;background:#03060b;color:#fff;}
     videoReady = duration > 0;
     video.pause();
     measure();
-    const scrollable = wrapHeight - window.innerHeight;
-    const progress = scrollable > 0 ? clamp((window.scrollY - wrapTop) / scrollable, 0, 1) : 0;
-    const targetIndex = pickStepIndex(progress);
-    // Видео стало готово позже, чем определился текущий шаг — досылаем
-    // его на нужную контрольную точку принудительно, даже если индекс
-    // шага не изменился с момента инициализации.
-    if (videoReady) animateVideoTo(steps[targetIndex].timeFrac * duration);
-    applyStep(targetIndex);
+    if (videoReady) {
+      // currentStepIndex мог уже уйти вперёд по скроллу, пока видео
+      // ещё грузилось (UI шагов не ждёт видео) — досылаем ролик на
+      // его контрольную точку принудительно, затем проверяем, не
+      // убежал ли скролл ещё дальше за это время.
+      isTransitioning = true;
+      animateVideoTo(steps[currentStepIndex].timeFrac * duration, () => {
+        isTransitioning = false;
+        goToNearestPendingStep();
+      });
+    } else {
+      goToNearestPendingStep();
+    }
   });
 
   video.addEventListener('error', onVideoError);
 
   buildIndicator();
   measure();
-  applyStep(0);
+  commitStepUI(0);
 
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', () => { measure(); updateFromScroll(); }, { passive: true });
