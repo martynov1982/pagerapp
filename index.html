@@ -1469,13 +1469,13 @@ a:focus-visible,button:focus-visible,.skip-link:focus{
         heroMobIntro.style.opacity = 1 - introT;
         heroMobIntro.style.transform = 'translateY(calc(-50% - ' + (introT * 46).toFixed(1) + 'px))';
 
-        // opacity, rotation and rise all share one timeline, so the very first visible
-        // sliver is already at the bottom edge — nothing jumps ahead of anything else.
-        // eased (not linear) so it still starts at 0 together, but doesn't sit imperceptibly
-        // faint for too long right after the intro title has already cleared out
-        var riseLinear = Math.min(1, Math.max(0, (progress - 0.04) / 0.86));
-        var riseT = 1 - (1 - riseLinear) * (1 - riseLinear);
-        heroMobPhone.style.opacity = riseT;
+        // position and rotation stay strictly linear off the same start point, so the
+        // phone genuinely lingers low at the bottom edge rather than racing upward —
+        // only opacity eases ahead of that, so whatever sliver is showing is visible
+        // sooner instead of sitting imperceptibly faint right after the title clears out
+        var riseT = Math.min(1, Math.max(0, (progress - 0.04) / 0.86));
+        var fadeT = 1 - (1 - riseT) * (1 - riseT);
+        heroMobPhone.style.opacity = fadeT;
         if(phoneAnim){ phoneAnim.currentTime = riseT * phoneAnimMs; }
 
         // travel fills the whole track: rises from off-screen to bottom-docked, narrows
