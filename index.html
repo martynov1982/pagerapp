@@ -1470,8 +1470,11 @@ a:focus-visible,button:focus-visible,.skip-link:focus{
         heroMobIntro.style.transform = 'translateY(calc(-50% - ' + (introT * 46).toFixed(1) + 'px))';
 
         // opacity, rotation and rise all share one timeline, so the very first visible
-        // sliver is already at the bottom edge — nothing jumps ahead of anything else
-        var riseT = Math.min(1, Math.max(0, (progress - 0.04) / 0.86));
+        // sliver is already at the bottom edge — nothing jumps ahead of anything else.
+        // eased (not linear) so it still starts at 0 together, but doesn't sit imperceptibly
+        // faint for too long right after the intro title has already cleared out
+        var riseLinear = Math.min(1, Math.max(0, (progress - 0.04) / 0.86));
+        var riseT = 1 - (1 - riseLinear) * (1 - riseLinear);
         heroMobPhone.style.opacity = riseT;
         if(phoneAnim){ phoneAnim.currentTime = riseT * phoneAnimMs; }
 
