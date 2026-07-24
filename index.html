@@ -355,13 +355,13 @@ a:focus-visible,button:focus-visible,.skip-link:focus{
   overflow:hidden;
 }
 .hero__mphone-wrap{
-  position:absolute;left:50%;top:50%;
-  transform:translate(-50%,calc(-50% + 55vh));
-  width:min(90vw,440px);
+  position:absolute;left:50%;bottom:0;
+  transform:translate(-50%,60vh);
+  width:130vw;
   aspect-ratio:745/1180;
   perspective:1100px;
   z-index:1;
-  will-change:transform;
+  will-change:transform,width;
 }
 .hero__mphone{
   position:absolute;inset:0;
@@ -394,8 +394,8 @@ a:focus-visible,button:focus-visible,.skip-link:focus{
 }
 .hero__moutro{
   position:absolute;
-  left:1.4rem;right:1.4rem;top:50%;
-  transform:translateY(-50%);
+  left:1.4rem;right:1.4rem;top:clamp(4.5rem,15vw,6rem);
+  transform:translateY(-16px);
   z-index:2;
   text-align:center;
   opacity:0;
@@ -417,7 +417,7 @@ a:focus-visible,button:focus-visible,.skip-link:focus{
   .hero__msticky{position:static;height:auto;min-height:80vh;display:flex;align-items:center;justify-content:center;padding:3rem 1.4rem;}
   .hero__mintro{display:none;}
   .hero__mphone{position:static;opacity:1;transform:none;}
-  .hero__mphone-wrap{position:static;transform:none;margin:0 auto;}
+  .hero__mphone-wrap{position:static;transform:none;width:100vw;margin:0 calc(-1 * 1.4rem);}
   .hero__moutro{position:static;opacity:1;transform:none;margin-top:1.6rem;}
 }
 
@@ -1446,16 +1446,21 @@ a:focus-visible,button:focus-visible,.skip-link:focus{
         heroMobIntro.style.opacity = 1 - introT;
         heroMobIntro.style.transform = 'translateY(calc(-50% - ' + (introT * 46).toFixed(1) + 'px))';
 
-        var phoneOpT = Math.min(1, Math.max(0, (progress - 0.06) / 0.3));
-        var phoneArriveT = Math.min(1, Math.max(0, (progress - 0.06) / 0.8));
-        var phoneRiseVh = (1 - phoneArriveT) * 55;
-        heroMobPhoneWrap.style.transform = 'translate(-50%,calc(-50% + ' + phoneRiseVh.toFixed(2) + 'vh))';
-        heroMobPhone.style.opacity = phoneOpT;
-        if(phoneAnim){ phoneAnim.currentTime = phoneArriveT * phoneAnimMs; }
+        // quick, synced fade-in + unfold-to-flat, so the phone never sits mid-rotation while visible
+        var quickT = Math.min(1, Math.max(0, (progress - 0.05) / 0.2));
+        heroMobPhone.style.opacity = quickT;
+        if(phoneAnim){ phoneAnim.currentTime = quickT * phoneAnimMs; }
+
+        // long, gradual travel: rises from off-screen to bottom-docked, narrows 130vw -> 100vw
+        var riseT = Math.min(1, Math.max(0, (progress - 0.05) / 0.8));
+        var phoneRiseVh = (1 - riseT) * 60;
+        var phoneWidthVw = 130 - 30 * riseT;
+        heroMobPhoneWrap.style.transform = 'translate(-50%,' + phoneRiseVh.toFixed(2) + 'vh)';
+        heroMobPhoneWrap.style.width = phoneWidthVw.toFixed(2) + 'vw';
 
         var outroT = Math.min(1, Math.max(0, (progress - 0.84) / 0.16));
         heroMobOutro.style.opacity = outroT;
-        heroMobOutro.style.transform = 'translateY(calc(-50% + ' + ((1 - outroT) * 20).toFixed(1) + 'px))';
+        heroMobOutro.style.transform = 'translateY(' + (-16 + (1 - outroT) * 14).toFixed(1) + 'px)';
       }
       document.addEventListener('scroll', function(){
         if(!heroTicking){ heroTicking = true; requestAnimationFrame(updateHeroMobile); }
