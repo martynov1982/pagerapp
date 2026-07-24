@@ -358,6 +358,7 @@ a:focus-visible,button:focus-visible,.skip-link:focus{
   position:absolute;left:50%;bottom:0;
   transform:translate(-50%,100%);
   width:130vw;
+  max-height:66vh;
   aspect-ratio:745/1180;
   perspective:1100px;
   z-index:1;
@@ -1445,6 +1446,23 @@ a:focus-visible,button:focus-visible,.skip-link:focus{
       var phoneAnimMs = 500; // matches the .5s duration in slide-rotate-hor-b-fwd
       if(phoneAnim){ phoneAnim.pause(); }
 
+      // measure real geometry instead of guessing vw/rem offsets, so the title
+      // never overlaps the fixed nav above it or the phone rising below it
+      var heroMobSticky = heroMobTrack.querySelector('.hero__msticky');
+      var navEl = document.querySelector('.nav');
+      function layoutHeroMobileGeometry(){
+        var stickyRect = heroMobSticky.getBoundingClientRect();
+        var navHeight = navEl ? navEl.getBoundingClientRect().height : 0;
+        var outroTop = navHeight + 20;
+        heroMobOutro.style.top = outroTop + 'px';
+        var outroHeight = heroMobOutro.getBoundingClientRect().height;
+        var reserved = outroTop + outroHeight + 28;
+        var maxH = stickyRect.height - reserved;
+        heroMobPhoneWrap.style.maxHeight = Math.max(180, maxH) + 'px';
+      }
+      layoutHeroMobileGeometry();
+      window.addEventListener('resize', layoutHeroMobileGeometry);
+
       var heroTicking = false;
       function updateHeroMobile(){
         heroTicking = false;
@@ -1457,10 +1475,12 @@ a:focus-visible,button:focus-visible,.skip-link:focus{
         heroMobIntro.style.opacity = 1 - introT;
         heroMobIntro.style.transform = 'translateY(calc(-50% - ' + (introT * 46).toFixed(1) + 'px))';
 
-        // quick, synced fade-in + unfold-to-flat, so the phone never sits mid-rotation while visible
-        var quickT = Math.min(1, Math.max(0, (progress - 0.05) / 0.2));
-        heroMobPhone.style.opacity = quickT;
-        if(phoneAnim){ phoneAnim.currentTime = quickT * phoneAnimMs; }
+        // unfold-to-flat resolves first, fully while invisible; only then does it fade in —
+        // so the phone is always flat by the time it's actually visible, never caught mid-twist
+        var rotT = Math.min(1, Math.max(0, (progress - 0.05) / 0.07));
+        if(phoneAnim){ phoneAnim.currentTime = rotT * phoneAnimMs; }
+        var opT = Math.min(1, Math.max(0, (progress - 0.12) / 0.18));
+        heroMobPhone.style.opacity = opT;
 
         // long, gradual travel: rises from off-screen to bottom-docked, narrows 130vw -> 100vw
         var riseT = Math.min(1, Math.max(0, (progress - 0.05) / 0.8));
